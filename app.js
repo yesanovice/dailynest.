@@ -67,6 +67,8 @@ function init() {
     });
 }
 
+let deferredPrompt;
+
 // Set up event listeners
 function setupEventListeners() {
     // Tab switching
@@ -76,6 +78,17 @@ function setupEventListeners() {
             switchTab(tabId);
         });
     });
+
+    // Install button
+    installBtn.addEventListener('click', installPWA);
+
+    // Before install prompt
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        installBtn.style.display = 'flex';
+    });
+}
 
     // Habit modal
     addHabitBtn.addEventListener('click', () => openHabitModal());
@@ -102,17 +115,6 @@ function setupEventListeners() {
         renderCalendar();
     });
 
-    // Install button
-    installBtn.addEventListener('click', installPWA);
-
-    // Before install prompt
-    window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        installBtn.style.display = 'flex';
-    });
-}
-
 // Check if we should show install prompt
 function checkInstallPrompt() {
     if (window.matchMedia('(display-mode: standalone)').matches) {
@@ -120,22 +122,20 @@ function checkInstallPrompt() {
     }
 }
 
-// Install PWA
 function installPWA() {
     if (deferredPrompt) {
         deferredPrompt.prompt();
-        deferredPrompt.userChoice.then((choiceResult) => {
+        deferredPrompt.userChoice.then(choiceResult => {
             if (choiceResult.outcome === 'accepted') {
-                console.log('User accepted the install prompt');
-                createConfetti();
+                console.log('PWA install accepted');
             } else {
-                console.log('User dismissed the install prompt');
+                console.log('PWA install dismissed');
             }
             deferredPrompt = null;
-            installBtn.style.display = 'none';
         });
     }
 }
+
 
 // Create confetti effect
 function createConfetti() {
