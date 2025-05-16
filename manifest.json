@@ -1,0 +1,16 @@
+{
+  "name": "Daily Nest",
+  "short_name": "Daily Nest",
+  "description": "Track your habits and build streaks",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#4f46e5",
+  "theme_color": "#4f46e5",
+  "icons": [
+    {
+      "src": "logo.png",
+      "type": "image/png",
+      "sizes": "any"
+    }
+  ]
+}
