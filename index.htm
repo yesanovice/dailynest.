@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Nest - Habit Tracker</title>
+    <meta name="description" content="Track your habits and build streaks with Daily Nest">
+    <meta name="theme-color" content="#6366f1">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="/favicon.png" type="image/png">
+    <link rel="apple-touch-icon" href="/favicon.png">
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Daily Nest</h1>
+            <p class="header-subtitle">Build habits, track progress, achieve goals</p>
+            <div class="nav-tabs">
+                <div class="tab active" data-tab="habits">Habits</div>
+                <div class="tab" data-tab="calendar">Calendar</div>
+                <div class="tab" data-tab="stats">Stats</div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Habits Tab -->
+        <div class="tab-content active" id="habits">
+            <div class="habits-header">
+                <h2>Your Habits</h2>
+                <button class="btn btn-primary" id="add-habit-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    Add Habit
+                </button>
+            </div>
+            <div class="habit-list" id="habit-list">
+                <!-- Habit cards will be added here dynamically -->
+            </div>
+        </div>
+
+        <!-- Calendar Tab -->
+        <div class="tab-content" id="calendar">
+            <div class="calendar-container">
+                <div class="calendar-nav">
+                    <button class="btn btn-secondary" id="prev-month">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="15 18 9 12 15 6"></polyline>
+                        </svg>
+                    </button>
+                    <div class="month-year" id="month-year">Month Year</div>
+                    <button class="btn btn-secondary" id="next-month">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </button>
+                </div>
+                <table class="calendar" id="calendar-table">
+                    <thead>
+                        <tr>
+                            <th>Sun</th>
+                            <th>Mon</th>
+                            <th>Tue</th>
+                            <th>Wed</th>
+                            <th>Thu</th>
+                            <th>Fri</th>
+                            <th>Sat</th>
+                        </tr>
+                    </thead>
+                    <tbody id="calendar-body">
+                        <!-- Calendar will be generated here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Stats Tab -->
+        <div class="tab-content" id="stats">
+            <div class="stats-container">
+                <h2>Your Progress</h2>
+                <div id="stats-content">
+                    <!-- Stats will be added here -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Add/Edit Habit Modal -->
+    <div class="modal" id="habit-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title" id="modal-title">Add New Habit</div>
+                <button class="close-btn" id="close-modal">&times;</button>
+            </div>
+            <form id="habit-form">
+                <input type="hidden" id="habit-id">
+                <div class="form-group">
+                    <label for="habit-name">Habit Name</label>
+                    <input type="text" id="habit-name" required placeholder="e.g. Drink 8 glasses of water">
+                </div>
+                <div class="form-group">
+                    <label for="habit-target">Target (per day)</label>
+                    <input type="number" id="habit-target" min="1" value="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="habit-start-date">Start Date</label>
+                    <input type="date" id="habit-start-date" required>
+                </div>
+                <div class="form-group">
+                    <label for="habit-color">Color</label>
+                    <select id="habit-color">
+                        <option value="#6366f1">Indigo</option>
+                        <option value="#10b981">Emerald</option>
+                        <option value="#3b82f6">Blue</option>
+                        <option value="#ef4444">Red</option>
+                        <option value="#f59e0b">Amber</option>
+                        <option value="#8b5cf6">Purple</option>
+                        <option value="#ec4899">Pink</option>
+                        <option value="#14b8a6">Teal</option>
+                    </select>
+                    <span class="habit-color-preview" id="color-preview" style="background-color: #6366f1;"></span>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" id="cancel-habit">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Habit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Install Button -->
+    <button class="install-btn" id="install-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+    </button>
+
+    <script src="app.js"></script>
+</body>
+</html>
