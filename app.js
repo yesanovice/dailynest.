@@ -78,6 +78,18 @@ function setupEventListeners() {
         });
     });
 
+    // Install button
+    installBtn.addEventListener('click', installPWA);
+
+    // Before install prompt
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        installBtn.style.display = 'flex';
+    });
+}
+
+
     // Habit modal
     addHabitBtn.addEventListener('click', () => openHabitModal());
     closeModalBtn.addEventListener('click', () => closeHabitModal());
@@ -120,6 +132,7 @@ function checkInstallPrompt() {
         installBtn.style.display = 'none';
     }
 }
+
 
 // Install PWA
 function installPWA() {
