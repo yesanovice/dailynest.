@@ -730,7 +730,6 @@ input:focus, select:focus {
     border: 2px solid var(--gray-200);
 }
 
-/* Install button styles */
 .install-btn {
     position: fixed;
     bottom: 2rem;
@@ -764,7 +763,7 @@ input:focus, select:focus {
     animation: none;
 }
 
-/* Responsive styles */
+/* Responsive Styles */
 @media (max-width: 768px) {
     .container {
         padding: 1rem;
@@ -775,7 +774,7 @@ input:focus, select:focus {
     }
     
     .calendar td {
-        height: 80px;
+        height: 70px;
         padding: 0.5rem;
     }
     
@@ -785,26 +784,90 @@ input:focus, select:focus {
     
     .modal-content {
         padding: 1.5rem;
+        width: 95%;
+    }
+
+    .install-btn {
+        bottom: 1rem;
+        right: 1rem;
+        width: 48px;
+        height: 48px;
     }
 }
 
 @media (max-width: 480px) {
+    .calendar th,
     .calendar td {
-        height: 60px;
-        font-size: 0.8rem;
+        padding: 5px 1px;
+        font-size: 12px;
+        height: 50px;
     }
-    
+
     .calendar-day {
-        font-size: 0.8rem;
+        font-size: 10px;
+        margin-bottom: 0;
     }
-    
+
+    .month-year {
+        font-size: 1rem;
+    }
+
+    .calendar-nav .btn {
+        padding: 0.25rem;
+        min-width: 30px;
+    }
+
     .habit-indicator {
-        width: 8px;
-        height: 8px;
+        width: 6px;
+        height: 6px;
+    }
+
+    h1 {
+        font-size: 1.5rem;
+    }
+
+    .header-subtitle {
+        font-size: 0.9rem;
+    }
+
+    .tab {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.85rem;
+    }
+
+    input, select {
+        padding: 0.6rem 0.8rem;
     }
 }
 
-/* Custom scrollbar */
+@media (max-width: 320px) {
+    .calendar th,
+    .calendar td {
+        font-size: 11px;
+        height: 45px;
+    }
+
+    .calendar-container {
+        padding: 0.5rem;
+    }
+
+    .modal-content {
+        padding: 1rem;
+    }
+}
+
+/* PWA Safe Area Support */
+@media all and (display-mode: standalone) {
+    body {
+        padding-top: env(safe-area-inset-top);
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+    header {
+        padding-top: calc(1.5rem + env(safe-area-inset-top));
+    }
+}
+
+/* Scrollbar Styles */
 ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -824,7 +887,7 @@ input:focus, select:focus {
     background: var(--primary-dark);
 }
 
-/* Tooltip styles */
+/* Tooltip Styles */
 [data-tooltip] {
     position: relative;
     cursor: pointer;
@@ -861,7 +924,7 @@ input:focus, select:focus {
     pointer-events: none;
 }
 
-/* Confetti effect */
+/* Confetti Effect */
 .confetti {
     position: fixed;
     width: 10px;
