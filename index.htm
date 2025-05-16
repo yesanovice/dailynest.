@@ -13,40 +13,6 @@
     <link rel="apple-touch-icon" href="/favicon.png">
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="style.css">
-    <style>
-        .install-btn {
-            position: fixed;
-            bottom: 2rem;
-            right: 2rem;
-            background: linear-gradient(to right, #6366f1, #8b5cf6); /* fallback gradient */
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 56px;
-            height: 56px;
-            font-size: 1.5rem;
-            cursor: pointer;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
-            transition: all 0.3s ease;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
-        }
-
-        .install-btn:hover {
-            transform: scale(1.1) translateY(-2px);
-            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.3);
-            animation: none;
-        }
-    </style>
 </head>
 <body>
     <header>
@@ -74,7 +40,9 @@
                     Add Habit
                 </button>
             </div>
-            <div class="habit-list" id="habit-list"></div>
+            <div class="habit-list" id="habit-list">
+                <!-- Habit cards will be added here dynamically -->
+            </div>
         </div>
 
         <!-- Calendar Tab -->
@@ -105,7 +73,9 @@
                             <th>Sat</th>
                         </tr>
                     </thead>
-                    <tbody id="calendar-body"></tbody>
+                    <tbody id="calendar-body">
+                        <!-- Calendar will be generated here -->
+                    </tbody>
                 </table>
             </div>
         </div>
@@ -114,12 +84,14 @@
         <div class="tab-content" id="stats">
             <div class="stats-container">
                 <h2>Your Progress</h2>
-                <div id="stats-content"></div>
+                <div id="stats-content">
+                    <!-- Stats will be added here -->
+                </div>
             </div>
         </div>
     </main>
 
-    <!-- Habit Modal -->
+    <!-- Add/Edit Habit Modal -->
     <div class="modal" id="habit-modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -163,7 +135,7 @@
     </div>
 
     <!-- Install Button -->
-    <button class="install-btn" id="install-btn" title="Install App">
+    <button class="install-btn" id="install-btn">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
             <polyline points="7 10 12 15 17 10"></polyline>
@@ -172,35 +144,5 @@
     </button>
 
     <script src="app.js"></script>
-    <script>
-        
-        const installBtn = document.getElementById('install-btn');
-
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            installBtn.style.display = 'flex';
-        });
-
-        if (window.matchMedia('(display-mode: standalone)').matches) {
-            installBtn.style.display = 'none';
-        }
-
-        installBtn.addEventListener('click', () => {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                deferredPrompt.userChoice.then((choiceResult) => {
-                    if (choiceResult.outcome === 'accepted') {
-                        console.log('User accepted the install prompt');
-                        // Optional: Add celebration like confetti here
-                    } else {
-                        console.log('User dismissed the install prompt');
-                    }
-                    deferredPrompt = null;
-                    installBtn.style.display = 'none';
-                });
-            }
-        });
-    </script>
 </body>
 </html>
