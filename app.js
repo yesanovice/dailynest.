@@ -23,6 +23,7 @@ const statsContent = document.getElementById('stats-content');
 const installBtn = document.getElementById('install-btn');
 const colorPreview = document.getElementById('color-preview');
 const habitColorSelect = document.getElementById('habit-color');
+const installBtn = document.getElementById('install-btn');
 
 // Habit icons based on name
 const habitIcons = {
