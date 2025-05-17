@@ -1,21 +1,16 @@
-const CACHE_NAME = 'daily-nest-cache-v3';
+const CACHE_NAME = 'daily-nest-cache-v2'; // Bump this version when deploying updates
 const CACHE_FILES = [
-  '/',
-  '/index.html',
-  '/style.css',
-  '/app.js',
-  '/icon-192x192.png',
-  '/icon-512x512.png',
-  '/manifest.json',
-  '/logo-192.png',
-  '/logo-512.png'
+  './',
+  './index.html',
+  './icon-192x192.png',
+  './icon-512x512.png'
 ];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => cache.addAll(CACHE_FILES))
-      .then(() => self.skipWaiting())
+      .then(() => self.skipWaiting()) // Activate immediately
   );
 });
 
@@ -25,11 +20,11 @@ self.addEventListener('activate', (event) => {
       return Promise.all(
         keys.map(key => {
           if (key !== CACHE_NAME) {
-            return caches.delete(key);
+            return caches.delete(key); // Delete old cache
           }
         })
       );
-    }).then(() => self.clients.claim())
+    }).then(() => self.clients.claim()) // Control all tabs immediately
   );
 });
 
