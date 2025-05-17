@@ -1,4 +1,4 @@
-const CACHE_NAME = 'daily-nest-cache-v3'; // Bump this when updating
+const CACHE_NAME = 'daily-nest-cache-v3'; // bump this on updates
 const CACHE_FILES = [
   './',
   './index.htm',
@@ -7,10 +7,10 @@ const CACHE_FILES = [
   './logo-192.png',
   './logo-512.png',
   './manifest.json',
-  './style.css',
+  './style.css'
 ];
 
-// Install event: cache app shell
+// Cache core files on install
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
@@ -19,7 +19,7 @@ self.addEventListener('install', (event) => {
   );
 });
 
-// Activate event: clean up old caches
+// Clear old caches on activate
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then(keys => {
@@ -34,21 +34,10 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Fetch event: serve from cache, fallback to network, fallback to offline
+// Serve cached files; fallback to network if not in cache
 self.addEventListener('fetch', (event) => {
-  if (event.request.mode === 'navigate') {
-    // Handle SPA-style routes
-    event.respondWith(
-      caches.match('./index.htm')
-        .then(response => response || fetch(event.request))
-        .catch(() => caches.match('./offline.html')) // Optional offline fallback
-    );
-  } else {
-    // Handle other requests
-    event.respondWith(
-      caches.match(event.request)
-        .then(response => response || fetch(event.request))
-        .catch(() => caches.match('./offline.html')) // Optional fallback
-    );
-  }
+  event.respondWith(
+    caches.match(event.request)
+      .then(response => response || fetch(event.request))
+  );
 });
