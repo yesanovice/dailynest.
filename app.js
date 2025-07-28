@@ -1,5 +1,6 @@
-// App Data
-let habits = JSON.parse(localStorage.getItem('habits')) || [];
+// Firebase and App Data
+import { db, collection, getDocs, query, where, doc, setDoc, updateDoc, deleteDoc, getDoc } from './firebase-config.js';
+let habits = [];
 let currentDate = new Date();
 let currentViewMonth = currentDate.getMonth();
 let currentViewYear = currentDate.getFullYear();
@@ -51,15 +52,27 @@ const habitIcons = {
 };
 
 // Initialize the app
-function init() {
-    renderHabits();
-    renderCalendar();
-    renderStats();
-    setupEventListeners();
-    checkInstallPrompt();
-    
-    // Set default date to today
-    document.getElementById('habit-start-date').valueAsDate = new Date();
+async function init() {
+    try {
+        // Load habits from Firebase
+        const habitsRef = collection(db, 'habits');
+        const snapshot = await getDocs(habitsRef);
+        habits = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+
+        renderHabits();
+        renderCalendar();
+        renderStats();
+        setupEventListeners();
+        checkInstallPrompt();
+        
+        // Set default date to today
+        document.getElementById('habit-start-date').valueAsDate = new Date();
+    } catch (error) {
+        console.error('Error initializing app:', error);
+    }
     
     // Update color preview when color changes
     habitColorSelect.addEventListener('change', (e) => {
@@ -218,7 +231,7 @@ function renderHabits() {
     
     sortedHabits.forEach((habit, index) => {
         const today = new Date().toISOString().split('T')[0];
-        const todayLog = habit.logs.find(log => log.date === today) || { completed: 0 };
+        const todayLog = habit.completions.find(log => log.date === today) || { completed: 0 };
         const progress = (todayLog.completed / habit.target) * 100;
         const streak = calculateCurrentStreak(habit);
         const icon = getHabitIcon(habit.name);
@@ -330,42 +343,43 @@ function shadeColor(color, percent) {
 }
 
 // Log habit completion for today
-function logHabitCompletion(habitId) {
-    const today = new Date().toISOString().split('T')[0];
-    const habitIndex = habits.findIndex(h => h.id === habitId);
-    
-    if (habitIndex === -1) return;
-    
-    const habit = habits[habitIndex];
-    const todayLogIndex = habit.logs.findIndex(log => log.date === today);
-    
-    if (todayLogIndex === -1) {
-        // No log for today, add one
-        habit.logs.push({ date: today, completed: 1 });
-    } else {
-        // Increment completed count, but don't exceed target
-        const todayLog = habit.logs[todayLogIndex];
-        if (todayLog.completed < habit.target) {
-            todayLog.completed++;
+async function logHabitCompletion(habitId) {
+    try {
+        const habitsRef = collection(db, 'habits');
+        const docRef = doc(habitsRef, habitId);
+        const docSnap = await getDoc(docRef);
+        
+        if (!docSnap.exists()) return;
+
+        const habit = docSnap.data();
+        const today = new Date();
+        const dateStr = today.toISOString().split('T')[0];
+        const completion = {
+            date: dateStr,
+            completed: true,
+            timestamp: new Date().toISOString()
+        };
+
+        // Check if already completed today
+        const existingCompletion = habit.completions.find(c => c.date === dateStr);
+        if (existingCompletion) {
+            existingCompletion.completed = !existingCompletion.completed;
         } else {
-            // Already completed target for today
-            return;
+            habit.completions.push(completion);
         }
-    }
-    
-    // Save and re-render
-    saveHabits();
-    renderHabits();
-    
-    // If on calendar view, update that too
-    if (document.querySelector('.tab.active').getAttribute('data-tab') === 'calendar') {
-        renderCalendar();
-    }
-    
-    // If completed target, show celebration
-    const todayLog = habit.logs.find(log => log.date === today);
-    if (todayLog && todayLog.completed >= habit.target) {
-        createConfetti();
+
+        await updateDoc(docRef, { completions: habit.completions });
+        
+        // Update local state
+        const index = habits.findIndex(h => h.id === habitId);
+        if (index !== -1) {
+            habits[index] = { ...habits[index], completions: habit.completions };
+        }
+
+        renderHabits();
+    } catch (error) {
+        console.error('Error logging habit completion:', error);
+        alert('Failed to log habit completion. Please try again.');
     }
 }
 
@@ -392,43 +406,54 @@ function closeHabitModal() {
 }
 
 // Handle habit form submission
-function handleHabitSubmit(e) {
+async function handleHabitSubmit(e) {
     e.preventDefault();
     
-    const id = document.getElementById('habit-id').value || generateId();
-    const name = document.getElementById('habit-name').value;
-    const target = parseInt(document.getElementById('habit-target').value);
-    const startDate = document.getElementById('habit-start-date').value;
-    const color = document.getElementById('habit-color').value;
-    
-    const habitData = {
-        id,
-        name,
-        target,
-        startDate,
-        color,
-        logs: []
-    };
-    
-    // Check if we're editing or adding
-    const existingHabitIndex = habits.findIndex(h => h.id === id);
-    
-    if (existingHabitIndex !== -1) {
-        // Editing - preserve logs
-        habitData.logs = habits[existingHabitIndex].logs;
-        habits[existingHabitIndex] = habitData;
-    } else {
-        // Adding new habit
-        habits.push(habitData);
+    const habitName = document.getElementById('habit-name').value;
+    const habitTarget = parseInt(document.getElementById('habit-target').value);
+    const habitStartDate = document.getElementById('habit-start-date').value;
+    const habitColor = document.getElementById('habit-color').value;
+    const habitId = editingHabitId || generateId();
+
+    if (!habitName) {
+        alert('Please enter a habit name');
+        return;
     }
-    
-    saveHabits();
-    renderHabits();
-    closeHabitModal();
+
+    const habit = {
+        id: habitId,
+        name: habitName,
+        target: habitTarget,
+        startDate: habitStartDate,
+        color: habitColor,
+        completions: [],
+        created: new Date().toISOString()
+    };
+
+    try {
+        const habitsRef = collection(db, 'habits');
+        const docRef = doc(habitsRef, habitId);
+        
+        if (editingHabitId) {
+            // Update existing habit
+            await updateDoc(docRef, habit);
+        } else {
+            // Add new habit
+            await setDoc(docRef, habit);
+        }
+
+        // Refresh local state
+        habits = [...habits, habit];
+        closeHabitModal();
+        renderHabits();
+    } catch (error) {
+        console.error('Error saving habit:', error);
+        alert('Failed to save habit. Please try again.');
+    }
 }
 
 // Edit a habit
-function editHabit(habitId) {
+async function editHabit(habitId) {
     const habit = habits.find(h => h.id === habitId);
     if (habit) {
         openHabitModal(habit);
@@ -436,22 +461,42 @@ function editHabit(habitId) {
 }
 
 // Delete a habit
-function deleteHabit(habitId) {
-    if (confirm('Are you sure you want to delete this habit? All progress will be lost.')) {
-        habits = habits.filter(h => h.id !== habitId);
-        saveHabits();
-        renderHabits();
+async function deleteHabit(habitId) {
+    try {
+        const habitsRef = collection(db, 'habits');
+        const docRef = doc(habitsRef, habitId);
+        await deleteDoc(docRef);
         
-        // If on calendar view, update that too
-        if (document.querySelector('.tab.active').getAttribute('data-tab') === 'calendar') {
-            renderCalendar();
+        // Update local state
+        const index = habits.findIndex(h => h.id === habitId);
+        if (index !== -1) {
+            habits.splice(index, 1);
+            renderHabits();
         }
+    } catch (error) {
+        console.error('Error deleting habit:', error);
+        alert('Failed to delete habit. Please try again.');
     }
 }
 
-// Save habits to localStorage
-function saveHabits() {
-    localStorage.setItem('habits', JSON.stringify(habits));
+// Save habits to Firebase
+async function saveHabits() {
+    try {
+        const habitsRef = collection(db, 'habits');
+        // First delete existing habits
+        const q = query(habitsRef);
+        const snapshot = await getDocs(q);
+        snapshot.forEach(async (doc) => {
+            await deleteDoc(doc.ref);
+        });
+
+        // Then add new habits
+        for (const habit of habits) {
+            await setDoc(doc(habitsRef), habit);
+        }
+    } catch (error) {
+        console.error('Error saving habits to Firebase:', error);
+    }
 }
 
 // Generate a unique ID
